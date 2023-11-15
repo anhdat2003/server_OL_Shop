@@ -8,8 +8,9 @@ const accountSchema = new db.mongoose.Schema(
         fullname:{type:String,required:true},
         email:{type:String,required:false},
         phone:{type:String,required:false},
-        address:{type:String,required:true},
+        address:{type:String,required:false},
         avatar:{type:String,required:false},
+        money:{type:Number,required:false,default:0},
         roleId:{type:db.mongoose.Schema.Types.ObjectId, ref:"roleModel"},
     },
     {

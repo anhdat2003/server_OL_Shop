@@ -7,7 +7,7 @@ const billSchema = new db.mongoose.Schema(
         productId:{type: db.mongoose.Schema.Types.ObjectId, ref:"productModel"},
         totalPrice:{type:Number,required:true},
         quantity:{type:Number,required:true},
-        status:{type:Number,required:true}
+        statusBill:{type:Number,required:true}
     },
     {
         collection:"bills"

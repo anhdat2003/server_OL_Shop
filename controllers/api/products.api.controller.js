@@ -1,46 +1,29 @@
 const productModel = require('../../models/products.model');
 
 exports.getListProduct = async(req,res,next)=>{
-    let dataReturn ={
-        message:"Lấy dữ liệu thành công",
-        status:200
-    }
-    let categoryId = req.query.categoryId||"";
-    try {
-        if(categoryId==""){
-            let listProduct = await productModel.productModel.find().populate("categoryId");
-            dataReturn.data = listProduct;
-        }else{
-            let listProduct = await productModel.productModel.find({categoryId:categoryId}).populate("categoryId");
-            dataReturn.data = listProduct;
-        }
-    } catch (error) {
-        dataReturn.message=error;
-        dataReturn.status=500;
-    }
-    return res.json(dataReturn);
+    
+    let listProduct = await productModel.productModel.find().populate("categoryId")   
+    return res.status(200).json(listProduct);
+}
+
+exports.getProductById = async(req,res,next)=>{
+    let product = await productModel.productModel
+        .findOne({ _id: req.params.idProduct }).populate("categoryId")
+    return res.status(200).json(product);
+}
+
+exports.getProductByIdCategory = async(req,res,next)=>{
+    let product = await productModel.productModel.find({categoryId:req.params.idCategory}).populate("categoryId")
+      return res.status(200).json(product);
 }
 
 exports.getListCategory = async(req,res,next)=>{
-    let dataReturn ={
-        message :"Lấy dữ liệu thành công",
-        status:200
-    }
-    try {
-        let listCategory = await productModel.categoryModel.find();
-        dataReturn.data = listCategory;
-    } catch (error) {
-        dataReturn.message= error;
-        dataReturn.status = 500;
-    }
-    return res.json(dataReturn);
+   
+    let listCategory = await productModel.categoryModel.find();
+    return res.status(200).json(listCategory);
 }
 
 exports.createProduct = async(req,res,next)=>{
-    let dataReturn = {
-        message: "Tạo sản phẩm thành công",
-        status: 200
-    };
     try {
         let objProduct = new productModel.productModel();
         objProduct.name = req.body.name;
@@ -50,11 +33,11 @@ exports.createProduct = async(req,res,next)=>{
         objProduct.imageProduct = req.body.imageProduct;
         objProduct.categoryId = req.body.categoryId;
         await objProduct.save();
+        res.status(200).json(dataReturn);
     } catch (error) {
-        dataReturn.message=error.message
-        dataReturn.status=500
+        return res.status(500).send(error.message);
     }
-    res.json(dataReturn);
+    
 }
 
 exports.createCategory = async(req,res,next)=>{
