@@ -13,6 +13,8 @@ router.get('/listAccount',apiAccount.listAccount);
 router.get('/listProduct',apiProduct.getListProduct);
 router.post('/createProduct',apiProduct.createProduct);
 router.put('/product/:idProduct',apiProduct.updateProduct);
+router.get('/productById/:idProduct',apiProduct.getProductById);
+router.get('/productByIdCategory/:idCategory',apiProduct.getProductByIdCategory);
 ///----------------------------///
 router.get('/listCategory',apiProduct.getListCategory);
 router.post('/createCategory',apiProduct.createCategory);
@@ -21,4 +23,5 @@ router.put('/category/:idCategory',apiProduct.updateCategory);
 router.get('/listBill',apiBill.getListBill);
 router.post('/createBill',apiBill.createBill);
 router.put('/bill/:idBill',apiBill.updateBill);
+router.get('/getListBillByIdAccount/:accountId',apiBill.getListBillByIdAccount);
 module.exports = router;

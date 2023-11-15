@@ -7,6 +7,8 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var accountRouter = require('./routes/accounts');
 const apiRouter = require("./routes/api");
+const moment = require('moment-timezone');
+moment.tz.setDefault('Asia/Ho_Chi_Minh');
 var app = express();
 
 // view engine setup

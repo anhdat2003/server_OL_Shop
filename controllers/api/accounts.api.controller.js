@@ -7,7 +7,7 @@ exports.login = async(req,res,next)=>{
         status:200,
         message:""
     }
-    let account = await accountModel.accountModel.findOne({username:req.body.username}).populate("roleId");
+    let account = await accountModel.accountModel.findOne({username:req.body.username});
     if(account!=null){
         let checkPasswd = await bcrypt.compare(req.body.passwd,account.passwd);
         console.log(checkPasswd);
@@ -27,51 +27,65 @@ exports.login = async(req,res,next)=>{
 }
 
 exports.getAccount = async(req,res,next)=>{
-    let dataReturn ={
-        message:"",
-        status:200
-    }
     const idAccount = req.params.idAccount;
-
-    let account = await accountModel.accountModel.findOne({_id:idAccount}).populate("roleId");
-    dataReturn.data = account
-    dataReturn.message="Lấy dữ liệu thành công"
-    res.json(dataReturn)
+    let account = await accountModel.accountModel.findOne({_id:idAccount})
+    res.json(account)
 }
 
 exports.listAccount = async(req,res,next)=>{
-    let dataReturn = {
-        status:200,
-        message:""
-    }
-    var list = await accountModel.accountModel.find().sort({username:1}).populate("roleId");
-    dataReturn.data = list;
-    res.json(dataReturn);
+
+    var list = await accountModel.accountModel.find().sort({username:1})
+    res.status(200).json(list);
 }
 
-exports.createAccount = async(req,res,next)=>{
+// exports.createAccount = async(req,res,next)=>{
+//     let dataReturn = {
+//         message: "Tạo tài khoản thành công",
+//         status: 200
+//     };
+//     try {
+//         let objAccount = new accountModel.accountModel();
+//         objAccount.username = req.body.username;
+//         const salt = await bcrypt.genSalt(15);
+//         objAccount.passwd = await bcrypt.hash(req.body.passwd,salt);
+//         objAccount.fullname = req.body.fullname;
+//         objAccount.email = req.body.email;
+//         objAccount.phone = req.body.phone;
+//         objAccount.address = req.body.address;
+//         objAccount.avatar = req.body.avatar;
+//         objAccount.roleId = '651bf925468e6af7a621cd54';
+//         await objAccount.save();
+//     } catch (error) {
+//         dataReturn.message=error.message
+//         dataReturn.status=500
+//     }
+//     res.json(dataReturn);
+// }
+exports.createAccount = async (req, res, next) => {
     let dataReturn = {
-        message: "Tạo tài khoản thành công",
-        status: 200
+      message: "Tạo tài khoản thành công",
+      status: 200,
     };
     try {
-        let objAccount = new accountModel.accountModel();
-        objAccount.username = req.body.username;
-        const salt = await bcrypt.genSalt(15);
-        objAccount.passwd = await bcrypt.hash(req.body.passwd,salt);
-        objAccount.fullname = req.body.fullname;
-        objAccount.email = req.body.email;
-        objAccount.phone = req.body.phone;
-        objAccount.address = req.body.address;
-        objAccount.avatar = req.body.avatar;
-        objAccount.roleId = '651bf925468e6af7a621cd54';
-        await objAccount.save();
+      let objAccount = new accountModel.accountModel();
+      objAccount.username = req.body.username;
+      const salt = await bcrypt.genSalt(15);
+      objAccount.passwd = await bcrypt.hash(req.body.passwd, salt);
+      objAccount.fullname = req.body.fullname;
+      objAccount.email = req.body.email;
+      // Trường phone, address và avatar để rỗng
+      objAccount.phone = '';
+      objAccount.address = '';
+      objAccount.avatar = '';
+      objAccount.money = 0;
+      objAccount.roleId = '651bf925468e6af7a621cd54';
+      await objAccount.save();
     } catch (error) {
-        dataReturn.message=error.message
-        dataReturn.status=500
+      dataReturn.message = error.message;
+      dataReturn.status = 500;
     }
     res.json(dataReturn);
-}
+  };
 
 exports.updateAccount = async(req,res,next)=>{
     let dataReturn ={
