@@ -4,7 +4,7 @@ const accountModel = require('../../models/accounts.model');
 
 exports.getListBill = async(req,res,next)=>{
 
-    let listBill = await billModel.billModel.find().populate("productId");
+    let listBill = await billModel.billModel.find();
 
     return res.status(200).json(listBill);
 }
@@ -93,4 +93,40 @@ exports.getListBillByIdAccount = async (req, res, next) => {
     }
   
     res.json(dataReturn);
-  };
+};
+
+exports.statisticalBill = async (req, res, next) => {
+  try {
+    let statisticalAll = await billModel.billModel.find();
+    let statisticalConfirm = await billModel.billModel.find({statusBill:1});
+    let statisticalCancelled = await billModel.billModel.find({statusBill:2});
+    let statisticalMoney = 0;
+    let numberOfBillsConfirm = statisticalConfirm.length;
+    let numberOfBillsCancelled = statisticalCancelled.length;
+    let numberOfBills = statisticalAll.length;
+
+    // Tính tổng số tiền
+    statisticalConfirm.forEach((bill) => {
+      statisticalMoney += bill.totalPrice;
+    });
+
+    // Trả về giá trị statisticalMoney hoặc thực hiện các thao tác bổ sung
+    res.status(200).json({ statisticalMoney, numberOfBillsConfirm,numberOfBillsCancelled,numberOfBills });
+  } catch (error) {
+    // Xử lý các lỗi xảy ra trong quá trình tính toán
+    next(error);
+  }
+};
+
+// exports.statisticalBill = async (req, res, next) => {
+//   try {
+//     let statistical = await billModel.billModel.find();
+//     let numberOfBills = statistical.length;
+
+//     // Trả về số lượng hóa đơn
+//     res.status(200).json({ numberOfBills });
+//   } catch (error) {
+//     // Xử lý các lỗi xảy ra trong quá trình thống kê
+//     next(error);
+//   }
+// };
