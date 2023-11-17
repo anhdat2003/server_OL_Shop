@@ -9,6 +9,7 @@ router.post('/createAccount',apiAccount.createAccount);
 router.get('/account/:idAccount',apiAccount.getAccount);
 router.put('/account/:idAccount',apiAccount.updateAccount);
 router.get('/listAccount',apiAccount.listAccount);
+router.put('/accountChangePasswd/:idAccount',apiAccount.changePassword);
 ///-----------------------------///
 router.get('/listProduct',apiProduct.getListProduct);
 router.post('/createProduct',apiProduct.createProduct);

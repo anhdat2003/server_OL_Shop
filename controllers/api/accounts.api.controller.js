@@ -61,12 +61,41 @@ exports.listAccount = async(req,res,next)=>{
 //     }
 //     res.json(dataReturn);
 // }
+// exports.createAccount = async (req, res, next) => {
+//     let dataReturn = {
+//       message: "Tạo tài khoản thành công",
+//       status: 200,
+//     };
+//     try {
+//       let objAccount = new accountModel.accountModel();
+//       objAccount.username = req.body.username;
+//       const salt = await bcrypt.genSalt(15);
+//       objAccount.passwd = await bcrypt.hash(req.body.passwd, salt);
+//       objAccount.fullname = req.body.fullname;
+//       objAccount.email = req.body.email;
+//       // Trường phone, address và avatar để rỗng
+//       objAccount.phone = '';
+//       objAccount.address = '';
+//       objAccount.avatar = '';
+//       objAccount.money = 0;
+//       objAccount.roleId = '651bf925468e6af7a621cd54';
+//       await objAccount.save();
+//     } catch (error) {
+//       dataReturn.message = error.message;
+//       dataReturn.status = 500;
+//     }
+//     res.json(dataReturn);
+//   };
 exports.createAccount = async (req, res, next) => {
-    let dataReturn = {
-      message: "Tạo tài khoản thành công",
-      status: 200,
-    };
     try {
+      // Kiểm tra xem đã tồn tại tài khoản với username đã nhập chưa
+      const existingAccount = await accountModel.accountModel.findOne({
+        username: req.body.username,
+      });
+      if (existingAccount) {
+        return res.status(400).send("Username đã tồn tại.");
+      }
+  
       let objAccount = new accountModel.accountModel();
       objAccount.username = req.body.username;
       const salt = await bcrypt.genSalt(15);
@@ -74,24 +103,23 @@ exports.createAccount = async (req, res, next) => {
       objAccount.fullname = req.body.fullname;
       objAccount.email = req.body.email;
       // Trường phone, address và avatar để rỗng
-      objAccount.phone = '';
-      objAccount.address = '';
-      objAccount.avatar = '';
+      objAccount.phone = "";
+      objAccount.address = "";
+      objAccount.avatar = "";
       objAccount.money = 0;
-      objAccount.roleId = '651bf925468e6af7a621cd54';
+      objAccount.roleId = "651bf925468e6af7a621cd54";
       await objAccount.save();
+      res.status(200).send("Đăng ký thành công");
     } catch (error) {
-      dataReturn.message = error.message;
-      dataReturn.status = 500;
+        return res
+        .status(500)
+        .send("Đã xảy ra lỗi khi đăng ký: " + error.message);
     }
-    res.json(dataReturn);
+  
+    
   };
 
 exports.updateAccount = async(req,res,next)=>{
-    let dataReturn ={
-        status:200,
-        message:"Cập nhật tài khoản thành công"
-    }
     let passwd = req.body.passwd ||"";
     let fullname = req.body.fullname||"";
     let avatar = req.body.avatar||""
@@ -99,7 +127,7 @@ exports.updateAccount = async(req,res,next)=>{
     let phone = req.body.phone || "";
     let address = req.body.address || "";
     try {
-        let account = await accountModel.accountModel.findOne({_id:req.params.idAccount}).populate("roleId");
+        let account = await accountModel.accountModel.findOne({_id:req.params.idAccount})
         let accountUpdate = account;
         if(passwd!=""&&fullname!=""&&avatar!=""&&email!=""&&phone!=""&&address!=""){
             const salt = await bcrypt.genSalt(15);
@@ -115,7 +143,7 @@ exports.updateAccount = async(req,res,next)=>{
             accountUpdate.address = req.body.address;
             
             await accountModel.accountModel.updateOne({_id:req.params.idAccount},accountUpdate);
-            return res.json(dataReturn)
+            return res.status(200).json(accountUpdate)
         }else{
             console.log("step2");
             if(passwd!=""){
@@ -168,10 +196,55 @@ exports.updateAccount = async(req,res,next)=>{
                 accountUpdate.updatedAt = new Date();
             }
             await accountModel.accountModel.updateOne({_id:req.params.idAccount}, accountUpdate)
-            return res.json(dataReturn)
+            return res.status(200).json(accountUpdate)
         }
     } catch (error) {
-        dataReturn.message=error
-        dataReturn.status=500
+        return res.status(500).send("Đã xảy ra lỗi khi cập nhật: " + error.message);
     }
 }
+exports.changePassword = async (req, res, next) => {
+    const accountId = req.params.idAccount;
+    const currentPassword = req.body.currentPassword || "";
+    const newPassword = req.body.newPassword || "";
+  
+    try {
+      // Tìm tài khoản trong cơ sở dữ liệu
+      const account = await accountModel.accountModel.findById(accountId);
+      if (!account) {
+        return res.status(404).send("Tài khoản không tồn tại.");
+      }
+  
+      // Kiểm tra mật khẩu hiện tại
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        account.passwd
+      );
+      if (!isPasswordValid) {
+        return res.status(400).send("Mật khẩu hiện tại không đúng.");
+      }
+  
+      // Kiểm tra mật khẩu mới trùng với mật khẩu hiện tại
+      const isSamePassword = await bcrypt.compare(newPassword, account.passwd);
+      if (isSamePassword) {
+        return res
+          .status(400)
+          .send("Mật khẩu mới phải khác mật khẩu hiện tại.");
+      }
+  
+      // Mã hóa mật khẩu mới
+      const salt = await bcrypt.genSalt(15);
+      const newPasswordHashed = await bcrypt.hash(newPassword, salt);
+  
+      // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+      account.passwd = newPasswordHashed;
+      account.updatedAt = new Date();
+  
+      await account.save();
+  
+      return res.status(200).json(accountId)
+    } catch (error) {
+      return res
+        .status(500)
+        .send("Đã xảy ra lỗi khi đổi mật khẩu: " + error.message);
+    }
+  };
