@@ -11,7 +11,7 @@ exports.getListBill = async(req,res,next)=>{
 
 exports.getListBillByIdAccount = async (req, res, next) => {
     try {
-      let listBill = await billModel.billModel.find({accountId: req.params.accountId});
+      let listBill = await billModel.billModel.find({accountId: req.params.accountId})
       if (!listBill) {
         return res.status(404).json({ message: 'Không tìm thấy hóa đơn' });
       }
